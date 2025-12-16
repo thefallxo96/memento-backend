@@ -54,7 +54,7 @@ const storySchema = new mongoose.Schema(
     // title: String, required, trimmed
     title: {
       type: String,
-      required: true,
+      required: [true, "Title is required"],
       trim: true,
     },
 
@@ -68,7 +68,7 @@ const storySchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: [true, "Author is required"],
     },
 
     // likes: Array of User ObjectIds

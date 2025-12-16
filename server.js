@@ -13,6 +13,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const mongoose = require("mongoose");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -43,7 +44,19 @@ app.use(express.json());
 // ===========================================
 
 // Connect to MongoDB (COLIN implements the connectDB function)
-connectDB();
+// connectDB();
+mongoose.connection.on("connected", () => {
+  console.log("MongoDB connected successfully");
+});
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 // ===========================================
 // MOUNT ROUTES
