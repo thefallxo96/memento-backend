@@ -131,57 +131,39 @@ router.delete("/:id", protect, async (req, res) => {
  *
  * COLIN's TASK
  * ===========================================
- *
- * PSEUDOCODE:
- * 1. Find story by ID
- * 2. Check if exists (404 if not)
- * 3. Check if user already liked (user ID in likes array)
- *    - If yes: REMOVE their ID (unlike)
- *    - If no: ADD their ID (like)
- * 4. Save story
- * 5. Return updated story with populated author
- *
- * HOW TO CHECK IF USER LIKED:
- * - story.likes is an array of ObjectIds
- * - Use .includes() but convert to strings first
- * - Or use .some() with toString() comparison
- *
- * HOW TO ADD/REMOVE FROM ARRAY:
- * - Add: story.likes.push(req.user._id)
- * - Remove: story.likes = story.likes.filter(id => id.toString() !== req.user._id.toString())
- *
- * ESTIMATED TIME: 3-4 hours
  */
 router.put("/:id/like", protect, async (req, res) => {
-  // TODO: Implement toggle like (COLIN)
+  try {
+    const story = await Story.findById(req.params.id);
 
-  // const story = await Story.findById(req.params.id);
-  //
-  // if (!story) {
-  //   return res.status(404).json({ message: 'Story not found' });
-  // }
-  //
-  // // Check if already liked
-  // const alreadyLiked = story.likes.some(
-  //   id => id.toString() === req.user._id.toString()
-  // );
-  //
-  // if (alreadyLiked) {
-  //   // Unlike: remove user ID from likes array
-  //   story.likes = story.likes.filter(
-  //     id => id.toString() !== req.user._id.toString()
-  //   );
-  // } else {
-  //   // Like: add user ID to likes array
-  //   story.likes.push(req.user._id);
-  // }
-  //
-  // await story.save();
-  // await story.populate('author', 'username');
-  //
-  // res.json(story);
+    if (!story) {
+      return res.status(404).json({ message: "Story not found" });
+    }
 
-  res.json({ message: "TODO: Implement toggle like" });
+    // Check if already liked
+    // We utilize .some() and convert to strings to ensure ObjectId comparison works
+    const alreadyLiked = story.likes.some(
+      (id) => id.toString() === req.user._id.toString()
+    );
+
+    if (alreadyLiked) {
+      // Unlike: remove user ID from likes array
+      story.likes = story.likes.filter(
+        (id) => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      // Like: add user ID to likes array
+      story.likes.push(req.user._id);
+    }
+
+    await story.save();
+    await story.populate("author", "username");
+
+    res.json(story);
+  } catch (error) {
+    console.error("Like error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;
